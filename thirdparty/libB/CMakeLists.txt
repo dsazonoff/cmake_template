@@ -12,7 +12,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set(CMAKE_DEBUG_POSTFIX "d")
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(${PROJECT_NAME}_BUILD_SHARED "Build C++ SDK as dynamic library" ON)
@@ -50,12 +49,15 @@ if (${PROJECT_NAME} STREQUAL "libA")
   target_link_libraries(${PROJECT_NAME} libB)
 endif()
 
+# Include directories
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
+target_include_directories(${PROJECT_NAME} INTERFACE
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
+
 # Export header
 include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME "${PROJECT_NAME}_export.h" DEFINE_NO_DEPRECATED)
-
-# Include directories
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
 
 # Installation
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets

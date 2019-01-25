@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_DEBUG_POSTFIX "d")
 
 find_package(libA CONFIG REQUIRED)
 
@@ -25,4 +26,4 @@ set(SRC_FILES "main.cpp")
 
 # Library
 add_executable(${PROJECT_NAME} ${SRC_FILES})
-target_link_libraries(${PROJECT_NAME} PUBLIC libA)
+target_link_libraries(${PROJECT_NAME} PUBLIC libA_LIBRARIES)
