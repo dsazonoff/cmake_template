@@ -3,9 +3,9 @@ set(libA_VERSION 0.1.0)
 @PACKAGE_INIT@
 
 set_and_check(libA_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
-set_and_check(libA_LIBRARIES "@PACKAGE_LIB_INSTALL_DIR@")
+set_and_check(libA_LINK_DIRECTORIES "@PACKAGE_LIB_INSTALL_DIR@")
 
-include_directories(${libA_INCLUDE_DIR})
-link_directories(${libA_LIBRARIES})
+# include_directories(${libA_INCLUDE_DIR})
+# link_directories(${libA_LINK_DIRECTORIES})
 
 check_required_components(libA)
