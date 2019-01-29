@@ -1,11 +1,12 @@
 set(libA_VERSION 0.1.0)
 
-@PACKAGE_INIT@
+@PACKAGE_INIT@ 
 
-set_and_check(libA_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
-set_and_check(libA_LINK_DIRECTORIES "@PACKAGE_LIB_INSTALL_DIR@")
+set_and_check(libA_INCLUDE_DIRS "@PACKAGE__INCLUDE_DIRS@")
 
-# include_directories(${libA_INCLUDE_DIR})
-# link_directories(${libA_LINK_DIRECTORIES})
+include(CMakeFindDependencyMacro)
+find_dependency(libB)
+
+include("${CMAKE_CURRENT_LIST_DIR}/libATargets.cmake")
 
 check_required_components(libA)

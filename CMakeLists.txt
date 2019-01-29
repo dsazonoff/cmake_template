@@ -26,4 +26,4 @@ set(SRC_FILES "main.cpp")
 
 # Library
 add_executable(${PROJECT_NAME} ${SRC_FILES})
-target_link_libraries(${PROJECT_NAME} PUBLIC libA_LIBRARIES)
+target_link_libraries(${PROJECT_NAME} PUBLIC libA)

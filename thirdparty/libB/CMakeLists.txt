@@ -14,16 +14,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set(CMAKE_DEBUG_POSTFIX "d")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-option(${PROJECT_NAME}_BUILD_SHARED "Build C++ SDK as dynamic library" ON)
-
-# Temporary, for debug
-set(libA_BUILD_SHARED ON)
-set(libB_BUILD_SHARED OFF)
-
-# Temporary cratch to prevent recursion
-if (${PROJECT_NAME} STREQUAL "libA")
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../libB ${CMAKE_CURRENT_BINARY_DIR}/libB EXCLUDE_FROM_ALL)
-endif()
+option(${PROJECT_NAME}_BUILD_SHARED "Build C++ SDK as dynamic library" OFF)
 
 if(WIN32)
   # Windows
@@ -43,55 +34,59 @@ else()
   add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 endif()
 
-# Dependencies
-# Temporary cratch to prevent recursion
-if (${PROJECT_NAME} STREQUAL "libA")
-  target_link_libraries(${PROJECT_NAME} libB)
-endif()
-
 # Include directories
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
-target_include_directories(${PROJECT_NAME} INTERFACE
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+target_include_directories(${PROJECT_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/includeB>
+  $<INSTALL_INTERFACE:includeB_inst>
 )
 
 # Export header
 include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME "${PROJECT_NAME}_export.h" DEFINE_NO_DEPRECATED)
 
-# Installation
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
-  LIBRARY DESTINATION  ${PROJECT_NAME}/lib
-  ARCHIVE DESTINATION  ${PROJECT_NAME}/lib
-  RUNTIME DESTINATION  ${PROJECT_NAME}/lib
-  INCLUDES DESTINATION ${PROJECT_NAME}/include
-)
-install(FILES ${HDR_FILES} "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h"
-  DESTINATION ${PROJECT_NAME}/include/${PROJECT_NAME}
-)
-if (${${PROJECT_NAME}_BUILD_SHARED})
-  install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> DESTINATION ${PROJECT_NAME}/lib CONFIGURATIONS Debug OPTIONAL)
-endif()
-
-# Package configuration file
+# Package
 include(CMakePackageConfigHelpers)
 
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-  COMPATIBILITY ExactVersion
+# Package for local build
+set(_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include")
+set(CMAKE_CONFIG_DESTINATION "${CMAKE_BINARY_DIR}")
+
+configure_package_config_file(
+  cmake/${PROJECT_NAME}Config.cmake.in
+  "${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION ${CMAKE_CONFIG_DESTINATION}
+  PATH_VARS _INCLUDE_DIRS
 )
-export(EXPORT ${PROJECT_NAME}Targets
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake"
-  NAMESPACE ${PROJECT_NAME}::
+export(TARGETS ${PROJECT_NAME} FILE "${CMAKE_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+export(PACKAGE ${PROJECT_NAME})
+
+unset(_INCLUDE_DIRS)
+unset(CMAKE_CONFIG_DESTINATION)
+
+# Package for installation
+set(_INCLUDE_DIRS "include")
+set(CMAKE_CONFIG_DESTINATION "cmake")
+
+configure_package_config_file(
+  cmake/${PROJECT_NAME}Config.cmake.in
+  "${CMAKE_INSTALL_PREFIX}/${CMAKE_CONFIG_DESTINATION}/${PROJECT_NAME}-config.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_CONFIG_DESTINATION}
+  PATH_VARS _INCLUDE_DIRS
 )
-set(INCLUDE_INSTALL_DIR ${PROJECT_NAME}/include)
-set(LIB_INSTALL_DIR ${PROJECT_NAME}/lib)
-configure_package_config_file(cmake/${PROJECT_NAME}Config.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-  INSTALL_DESTINATION ${PROJECT_NAME}/cmake
-  PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR)
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-  DESTINATION ${PROJECT_NAME}/cmake
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
+  LIBRARY DESTINATION  lib
+  ARCHIVE DESTINATION  lib
+  RUNTIME DESTINATION  bin
+  INCLUDES DESTINATION ${_INCLUDE_DIRS}
 )
+install(EXPORT ${PROJECT_NAME} DESTINATION ${CMAKE_CONFIG_DESTINATION} FILE ${PROJECT_NAME}Targets.cmake)
+install(
+  FILES ${HDR_FILES} "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h"
+  DESTINATION include/${PROJECT_NAME}
+)
+if (${${PROJECT_NAME}_BUILD_SHARED})
+  install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> DESTINATION bin CONFIGURATIONS Debug OPTIONAL)
+endif()
+
+unset(_INCLUDE_DIRS)
+unset(CMAKE_CONFIG_DESTINATION)
