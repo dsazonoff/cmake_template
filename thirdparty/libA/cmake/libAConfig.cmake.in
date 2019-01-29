@@ -5,7 +5,7 @@ set(libA_VERSION 0.1.0)
 set_and_check(libA_INCLUDE_DIRS "@PACKAGE__INCLUDE_DIRS@")
 
 include(CMakeFindDependencyMacro)
-find_dependency(libB)
+# find_dependency(libB)
 
 include("${CMAKE_CURRENT_LIST_DIR}/libATargets.cmake")
 

@@ -50,6 +50,7 @@ include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME "${PROJECT_NAME}_export.h" DEFINE_NO_DEPRECATED)
 
 # Package
+include(./cmake/PackageGeneratorHelper.cmake)
 include(CMakePackageConfigHelpers)
 
 # Package for local build
@@ -63,7 +64,7 @@ configure_package_config_file(
   PATH_VARS _INCLUDE_DIRS
 )
 export(TARGETS ${PROJECT_NAME} FILE "${CMAKE_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
-export(PACKAGE ${PROJECT_NAME})
+#export(PACKAGE ${PROJECT_NAME})
 
 unset(_INCLUDE_DIRS)
 unset(CMAKE_CONFIG_DESTINATION)
